@@ -7,7 +7,6 @@ import javax.persistence.*;
 public class Aeropuerto {
     @Id
     @Column(name = "aeropuerto_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer aeropuertoId;
 
     @Column(name = "nombre_aeropuerto")
