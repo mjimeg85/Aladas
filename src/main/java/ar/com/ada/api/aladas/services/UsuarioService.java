@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import ar.com.ada.api.aladas.entities.*;
+import ar.com.ada.api.aladas.entities.Pais.PaisEnum;
+import ar.com.ada.api.aladas.entities.Pais.TipoDocuEnum;
 import ar.com.ada.api.aladas.entities.Usuario.TipoUsuarioEnum;
 import ar.com.ada.api.aladas.repos.UsuarioRepository;
 import ar.com.ada.api.aladas.security.Crypto;
@@ -25,6 +27,12 @@ public class UsuarioService {
   // StaffService staffService;
   @Autowired
   UsuarioRepository usuarioRepository;
+  
+  @Autowired
+  StaffService staffService;
+ 
+  @Autowired
+  PasajeroService pasajeroService;
 
   public Usuario buscarPorUsername(String username) {
     return usuarioRepository.findByUsername(username);
@@ -46,11 +54,42 @@ public class UsuarioService {
     return u;
   }
 
-  public Usuario crearUsuario(TipoUsuarioEnum tipoUsuario, String nombre, int pais, int tipoDocumento, String documento,
-       String email, String password) {
+  public Usuario crearUsuario(TipoUsuarioEnum tipoUsuario, String nombre, int pais, Date fechaNacimiento,
+      TipoDocuEnum tipoDocumento, String documento, String email, String password) {
 
-    // Todo!
-    return null;
+    Usuario usuario = new Usuario();
+    usuario.setUsername(email);
+    usuario.setEmail(email);
+    usuario.setPassword(Crypto.encrypt(password, email.toLowerCase()));
+    usuario.setTipoUsuario(tipoUsuario);
+
+    if (tipoUsuario == TipoUsuarioEnum.PASAJERO) {
+      Pasajero pasajero = new Pasajero();
+
+      pasajero.setDocumento(documento);
+      pasajero.setPaisId(PaisEnum.parse(pais));
+      pasajero.setFechaNacimiento(fechaNacimiento);
+      pasajero.setNombre(nombre);
+      pasajero.setTipoDocumentoId(tipoDocumento);
+      pasajero.setUsuario(usuario);
+
+      pasajeroService.crearPasajero(pasajero);
+
+    } else { // en este caso, asumios que si no es pasajero es staff
+      Staff staff = new Staff();
+      staff.setDocumento(documento);
+      staff.setPaisId(PaisEnum.parse(pais));
+      staff.setFechaNacimiento(fechaNacimiento);
+      staff.setNombre(nombre);
+      staff.setTipoDocumentoId(tipoDocumento);
+      staff.setUsuario(usuario);
+
+      staffService.crearStaff(staff);
+
+
+    }
+
+    return usuario;
   }
 
   public Usuario buscarPorEmail(String email) {
