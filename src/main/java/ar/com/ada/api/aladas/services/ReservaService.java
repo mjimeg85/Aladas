@@ -50,5 +50,8 @@ public class ReservaService {
         return reserva.getReservaId();
     }
 
-}
+    public Reserva buscarPorId(Integer id) {
+        return repo.findByReservaId(id);
+    }
 
+}
